@@ -1,5 +1,6 @@
 import requests
 from decouple import config as secret
+from requests import Response
 
 
 class SpoonacularApiServiceError(Exception):
@@ -8,21 +9,36 @@ class SpoonacularApiServiceError(Exception):
     """
 
 
-class SpoonacularApiService:
+class SpoonacularApiService(object):
+    """
+    Class for making requests to Spoonacular Api.
+    """
+
     def __init__(self):
         self._base_url = "https://api.spoonacular.com/recipes"
         self._session = requests.session()
 
-    def _get(self, endpoint, params=None):
+    def _get(self, endpoint, params=None) -> Response:
         headers = {"content-type": "application/json"}
-        response = self._session.get(f"{self._base_url}/{endpoint}", params=params, headers=headers)
+        response = self._session.get(
+            f"{self._base_url}/{endpoint}", params=params, headers=headers
+        )
         response.raise_for_status()
-        return response.json()
+        return response
 
-    def _get_by_ingredients(self, ingredients: str):
+    def get_by_ingredients(self, ingredients: str) -> list:
+        """
+        Method to get recipes by ingredients name.
+        Maximum of 3 ingredients allowed.
+
+        Args:
+            - ingredients (str): it's sent as query param from our api.
+        """
         endpoint = "findByIngredients"
         params = {}
-        ingredients_quantity = len(ingredients.split(", ")) if "," in ingredients else 0
+        ingredients_quantity = (
+            len(ingredients.split(",")) if "," in ingredients else 0
+        )
         try:
             if ingredients_quantity <= 3 and ingredients_quantity != 0:
                 params["apiKey"] = self._get_api_key()
@@ -36,16 +52,35 @@ class SpoonacularApiService:
             message = f"Error getting endpoint {endpoint} with params {ingredients}: {error}"
             raise SpoonacularApiServiceError(message)
 
-    def _handle_data(self, response):
-        handle_recipes = []
-        dict_recipe = {}
-        for recipe in response:
-            dict_recipe["title"] = recipe["title"]
-            dict_recipe["image"] = recipe["image"]
-            dict_recipe["ingredient"] = [ingredient["name"] for ingredient in recipe["usedIngredients"]]
-            dict_recipe["ingredient"] += [ingredient["name"] for ingredient in recipe["missedIngredients"]]
-            handle_recipes.append(dict_recipe)
-            return handle_recipes
+    def _handle_data(self, response) -> list:
+        """
+        It's used to manipulate the Spoonacular API response to return the following attributes:
+        - title;
+        - image;
+        - ingredients.
 
-    def _get_api_key(self):
+        Args:
+            - response (Response): It's received from _get method.
+        """
+        handle_recipes = []
+        for recipe in response.json():
+            dict_recipe = {
+                "title": recipe["title"],
+                "image": recipe["image"],
+                "ingredients": [
+                    ingredient["name"]
+                    for ingredient in recipe["usedIngredients"]
+                ],
+            }
+            dict_recipe["ingredients"] += [
+                ingredient["name"]
+                for ingredient in recipe["missedIngredients"]
+            ]
+            handle_recipes.append(dict_recipe)
+        return handle_recipes
+
+    def _get_api_key(self) -> str:
+        """
+        Get the API_KEY from .env file
+        """
         return secret("API_KEY")
