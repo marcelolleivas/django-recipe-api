@@ -10,6 +10,7 @@ Django = "^3.2.5"
 django-rest-framework = "^0.1.0"
 requests = "^2.25.1"
 python-decouple = "^3.4"
+drf-yasg = "^1.20.0"
 
 [tool.poetry.dev-dependencies]
 black = "^21.6b0"
