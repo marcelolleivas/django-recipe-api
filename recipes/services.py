@@ -5,7 +5,7 @@ from requests import Response
 
 class SpoonacularApiServiceError(Exception):
     """
-    Handle error in PreciselyApiService.
+    Handle error in SpoonacularApiService.
     """
 
 
@@ -36,9 +36,11 @@ class SpoonacularApiService(object):
         """
         endpoint = "findByIngredients"
         params = {}
-        ingredients_quantity = (
-            len(ingredients.split(",")) if "," in ingredients else 0
-        )
+        ingredients_quantity = 0
+        if ingredients:
+            ingredients_quantity = (
+                len(ingredients.split(",")) if "," in ingredients else 1
+            )
         try:
             if ingredients_quantity <= 3 and ingredients_quantity != 0:
                 params["apiKey"] = self._get_api_key()
@@ -52,7 +54,8 @@ class SpoonacularApiService(object):
             message = f"Error getting endpoint {endpoint} with params {ingredients}: {error}"
             raise SpoonacularApiServiceError(message)
 
-    def _handle_data(self, response) -> list:
+    @staticmethod
+    def _handle_data(response) -> list:
         """
         It's used to manipulate the Spoonacular API response to return the following attributes:
         - title;
@@ -79,7 +82,8 @@ class SpoonacularApiService(object):
             handle_recipes.append(dict_recipe)
         return handle_recipes
 
-    def _get_api_key(self) -> str:
+    @staticmethod
+    def _get_api_key() -> str:
         """
         Get the API_KEY from .env file
         """
