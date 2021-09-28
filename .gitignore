@@ -166,6 +166,7 @@ cython_debug/
 # Installer logs
 
 # Unit test / coverage reports
+.pytest_cache
 
 # Translations
 
