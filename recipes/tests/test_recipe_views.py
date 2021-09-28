@@ -2,7 +2,8 @@ import os
 import sys
 
 import pytest
-from rest_framework.status import HTTP_200_OK, HTTP_403_FORBIDDEN
+from rest_framework.status import HTTP_200_OK, HTTP_403_FORBIDDEN, \
+    HTTP_408_REQUEST_TIMEOUT, HTTP_422_UNPROCESSABLE_ENTITY
 
 sys.path.append(os.getcwd())
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "recipe_factory.settings")
@@ -18,11 +19,11 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "recipe_factory.settings")
 )
 @pytest.mark.django_db
 def test_should_return_recipe_when_valid_param_is_sent(
-    requests_mock,
-    client,
-    query_param,
-    ingredient_return,
-    spoonacular_ingredient_response,
+        requests_mock,
+        client,
+        query_param,
+        ingredient_return,
+        spoonacular_ingredient_response,
 ):
     # ARRANGE
     base_url = "https://api.spoonacular.com/recipes"
@@ -44,11 +45,11 @@ def test_should_return_recipe_when_valid_param_is_sent(
 )
 @pytest.mark.django_db
 def test_should_return_forbidden_when_params_are_invalid(
-    requests_mock,
-    client,
-    query_param,
-    spoonacular_ingredient_response,
-    total_error,
+        requests_mock,
+        client,
+        query_param,
+        spoonacular_ingredient_response,
+        total_error,
 ):
     # ARRANGE
     base_url = "https://api.spoonacular.com/recipes"
@@ -68,22 +69,27 @@ def test_should_return_forbidden_when_params_are_invalid(
     )
 
 
-# TODO test when spoonacular is problematic
-# @pytest.mark.django_db
-# def test_should_return_unprocessable_entity_when_spoonacular_api_not_working(
-#         requests_mock,
-#         client,
-# ):
-#     # ARRANGE
-#     base_url = 'https://api.spoonacular.com/recipes'
-#     endpoint = 'findByIngredients'
-#     requests_mock.get(f'{base_url}/{endpoint}', status_code=HTTP_408_REQUEST_TIMEOUT)
-#
-#     # ACT
-#     response = client.get(
-#             '/recipes?i=onion'
-#         )
-#
-#     # ASSERT
-#     print(response.json())
-#     # assert response.status_code == HTTP_422_UNPROCESSABLE_ENTITY
+@pytest.mark.django_db
+def test_should_return_unprocessable_entity_when_spoonacular_api_not_working(
+        requests_mock,
+        client,
+):
+    # ARRANGE
+    base_url = 'https://api.spoonacular.com/recipes'
+    endpoint = 'findByIngredients'
+    requests_mock.get(
+        f'{base_url}/{endpoint}',
+        status_code=HTTP_408_REQUEST_TIMEOUT
+    )
+
+    # ACT
+    response = client.get(
+        '/recipes?i=onion'
+    )
+
+    # ASSERT
+    assert response.status_code == HTTP_422_UNPROCESSABLE_ENTITY
+    assert (
+        "Error while trying to get data from Spoonacular API"
+        in response.json()[0]
+    )
