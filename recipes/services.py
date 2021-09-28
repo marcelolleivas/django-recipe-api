@@ -47,12 +47,19 @@ class SpoonacularApiService(object):
                 return self._handle_data(result)
             else:
                 message = {
-                    f"Should get 1 to 3 ingredients but got {ingredients_quantity}"
+                    f"Should get 1 to 3 ingredients but got "
+                    f"{ingredients_quantity}"
                 }
                 raise SpoonacularBusinessRuleError(message)
-        except Exception as error:
+        except SpoonacularBusinessRuleError as error:
             message = {
-                f"Error getting endpoint {endpoint} with params {ingredients}: {error}"
+                f"Error getting endpoint {endpoint} with params "
+                f"{ingredients}: {error}"
+            }
+            raise SpoonacularBusinessRuleError(message)
+        except HTTPError as error:
+            message = {
+                f"Error while trying to get data from Spoonacular API: {error}"
             }
             raise SpoonacularApiServiceError(message)
 
@@ -67,7 +74,8 @@ class SpoonacularApiService(object):
     @staticmethod
     def _handle_data(response) -> list:
         """
-        It's used to manipulate the Spoonacular API response to return the following attributes:
+        It's used to manipulate the Spoonacular API response to
+        return the following attributes:
         - title;
         - image;
         - ingredients.
