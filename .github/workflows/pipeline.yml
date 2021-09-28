@@ -4,6 +4,8 @@ on: push
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      API_KEY: 'lorem-ipsum'
     steps:
 
       #----------------------------------------------
