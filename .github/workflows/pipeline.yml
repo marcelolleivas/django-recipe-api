@@ -50,3 +50,11 @@ jobs:
         run: source .venv/bin/activate && make code-convention
       - name: Test
         run: source .venv/bin/activate && make test
+
+      #----------------------------------------------
+      #         generating coverage badge
+      #----------------------------------------------
+      - name: "Upload coverage to Codecov"
+          uses: codecov/codecov-action@v2
+          with:
+            fail_ci_if_error: true
