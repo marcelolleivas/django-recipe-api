@@ -1,9 +1,15 @@
 import requests
 from decouple import config as secret
-from requests import Response
+from requests import HTTPError, Response
 
 
 class SpoonacularApiServiceError(Exception):
+    """
+    Handle error in SpoonacularApiService.
+    """
+
+
+class SpoonacularBusinessRuleError(Exception):
     """
     Handle error in SpoonacularApiService.
     """
@@ -17,14 +23,6 @@ class SpoonacularApiService(object):
     def __init__(self):
         self._base_url = "https://api.spoonacular.com/recipes"
         self._session = requests.session()
-
-    def _get(self, endpoint, params=None) -> Response:
-        headers = {"content-type": "application/json"}
-        response = self._session.get(
-            f"{self._base_url}/{endpoint}", params=params, headers=headers
-        )
-        response.raise_for_status()
-        return response
 
     def get_by_ingredients(self, ingredients: str) -> list:
         """
@@ -48,11 +46,23 @@ class SpoonacularApiService(object):
                 result = self._get(endpoint, params=params)
                 return self._handle_data(result)
             else:
-                message = f"Should get 1 to 3 ingredients but got {ingredients_quantity}"
-                raise SpoonacularApiServiceError(message)
+                message = {
+                    f"Should get 1 to 3 ingredients but got {ingredients_quantity}"
+                }
+                raise SpoonacularBusinessRuleError(message)
         except Exception as error:
-            message = f"Error getting endpoint {endpoint} with params {ingredients}: {error}"
+            message = {
+                f"Error getting endpoint {endpoint} with params {ingredients}: {error}"
+            }
             raise SpoonacularApiServiceError(message)
+
+    def _get(self, endpoint, params=None) -> Response:
+        headers = {"content-type": "application/json"}
+        response = self._session.get(
+            f"{self._base_url}/{endpoint}", params=params, headers=headers
+        )
+        response.raise_for_status()
+        return response
 
     @staticmethod
     def _handle_data(response) -> list:
