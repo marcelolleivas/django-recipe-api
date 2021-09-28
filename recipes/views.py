@@ -8,10 +8,12 @@ from drf_yasg.openapi import (
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import mixins, viewsets
 from rest_framework.response import Response
-from rest_framework.status import HTTP_403_FORBIDDEN
+from rest_framework.status import HTTP_403_FORBIDDEN, \
+    HTTP_422_UNPROCESSABLE_ENTITY
 
 from .serializers import RecipeListSerializer
-from .services import SpoonacularApiService, SpoonacularApiServiceError
+from .services import SpoonacularApiService, \
+    SpoonacularApiServiceError, SpoonacularBusinessRuleError
 
 
 class RecipeList(mixins.ListModelMixin, viewsets.GenericViewSet):
@@ -31,8 +33,11 @@ class RecipeList(mixins.ListModelMixin, viewsets.GenericViewSet):
             ingredients = request.GET.get("i")
             data = self.spoon_service.get_by_ingredients(ingredients)
             return Response(data)
+        except SpoonacularBusinessRuleError as error:
+            return Response(
+                error.args[0], status=HTTP_403_FORBIDDEN
+            )
         except SpoonacularApiServiceError as error:
-            return Response(error.args[0], status=HTTP_403_FORBIDDEN)
-
-    def get_queryset(self):
-        return
+            return Response(
+                error.args[0], status=HTTP_422_UNPROCESSABLE_ENTITY
+            )
