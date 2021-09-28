@@ -19,7 +19,7 @@ def ingredient_return():
     return [
         {
             "title": "Charred spring onions",
-            "image": "https://spoonacular.com/recipeImages/1089425-312x231.jpg",
+            "image": "https://spoonacular.com/recipeImages/1089425-312x23.jpg",
             "ingredients": ["spring onions"],
         }
     ]
@@ -31,7 +31,7 @@ def spoonacular_ingredient_response():
         {
             "id": 1089425,
             "title": "Charred spring onions",
-            "image": "https://spoonacular.com/recipeImages/1089425-312x231.jpg",
+            "image": "https://spoonacular.com/recipeImages/1089425-312x23.jpg",
             "imageType": "jpg",
             "usedIngredientCount": 1,
             "missedIngredientCount": 0,
@@ -50,7 +50,8 @@ def spoonacular_ingredient_response():
                     "originalName": "spring onions (about 20)",
                     "metaInformation": ["( 20)"],
                     "meta": ["( 20)"],
-                    "image": "https://spoonacular.com/cdn/ingredients_100x100/spring-onions.jpg",
+                    "image": "https://spoonacular.com/cdn/"
+                             "ingredients_10x10/spring-onions.jpg",
                 }
             ],
             "unusedIngredients": [],
